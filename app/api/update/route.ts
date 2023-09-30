@@ -26,8 +26,7 @@ export async function GET(request: NextRequest) {
       id: c.id,
       name: c.displayName?.at(0)?._value || c.id,
       icon: c.icon?.at(0)?.src,
-      today: [],
-      tomorrow: [],
+      programmes: [],
     }));
 
     const today = programme.programmes
@@ -38,14 +37,14 @@ export async function GET(request: NextRequest) {
       .filter((p) => isTomorrow(p.start) || isTomorrow(p.stop!))
       .sort((b, a) => b.start.getTime() - a.start.getTime());
 
-    const build = (name: 'today' | 'tomorrow', eps: XmltvProgramme[]) => {
-      console.log('build ' + name);
-      for (const chaine of chaines) {
+    const build = (eps: XmltvProgramme[]) => {
+      const result = structuredClone(chaines);
+      for (const chaine of result) {
         const progs = eps.filter(
           (p) => p.channel === chaine.id && p.start.getHours() >= 20
         );
         for (const prog of progs) {
-          chaine[name].push({
+          chaine.programmes.push({
             start: prog.start.getTime(),
             stop: prog.stop!.getTime(),
             title: prog.title.filter((p) => p.lang === 'fr')[0]._value,
@@ -56,12 +55,12 @@ export async function GET(request: NextRequest) {
           });
         }
       }
+      return result;
     };
-    build('today', today);
-    build('tomorrow', tomorrow);
 
     await kv.set('last_update', new Date());
-    await kv.set('soirees', chaines);
+    await kv.set('today', build(today));
+    await kv.set('tomorrow', build(tomorrow));
 
     console.log('Done.');
   } catch (e) {

@@ -1,3 +1,4 @@
+import { Link } from '@/components/link';
 import { heure } from '@/lib/utils';
 import { kv } from '@vercel/kv';
 import { formatDistance, isTomorrow, setDefaultOptions } from 'date-fns';
@@ -15,7 +16,7 @@ const filter = (programmes: Programme[]) =>
 
 export default async function Home() {
   const lastupdate = new Date((await kv.get<string>('last_update')) || 0);
-  const chaines = (await kv.get<Chaine[]>('soirees')) || [];
+  const chaines = (await kv.get<Chaine[]>('today')) || [];
 
   return (
     <main className="flex min-h-screen flex-col justify-between md:p-24">
@@ -32,10 +33,12 @@ export default async function Home() {
             <div className="flex flex-row">
               <img src={chaine.icon} className="object-contain h-12 w-20 p-2" />
               <div className="grow ml-2">
-                {filter(chaine.today).map((prog) => (
+                {filter(chaine.programmes).map((prog) => (
                   <div key={chaine.id + prog.start} className="flex flex-row">
                     <div className="w-14">{heure(prog.start)}</div>
-                    {prog.title}
+                    <Link href={`/programme/${chaine.id}/${prog.start}`}>
+                      {prog.title}
+                    </Link>
                   </div>
                 ))}
               </div>

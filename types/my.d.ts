@@ -11,6 +11,5 @@ type Chaine = {
   id: string;
   name: string;
   icon?: string;
-  today: Programme[];
-  tomorrow: Programme[];
+  programmes: Programme[];
 };
