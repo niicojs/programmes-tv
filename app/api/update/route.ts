@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { gunzip } from 'node:zlib';
 import { promisify } from 'node:util';
 import { XmltvProgramme, parseXmltv } from '@iptv/xmltv';
-import { isToday, isTomorrow } from 'date-fns';
+import { isToday } from 'date-fns';
 import { kv } from '@vercel/kv';
+import { sql } from '@vercel/postgres';
 import { ofetch } from 'ofetch';
+import { utcToZonedTime } from 'date-fns-tz';
 
 const ungz = promisify(gunzip);
 
@@ -33,9 +35,9 @@ export async function GET(request: NextRequest) {
       .filter((p) => isToday(p.start))
       .sort((b, a) => b.start.getTime() - a.start.getTime());
 
-    const tomorrow = programme.programmes
-      .filter((p) => isTomorrow(p.start) || isTomorrow(p.stop!))
-      .sort((b, a) => b.start.getTime() - a.start.getTime());
+    // const tomorrow = programme.programmes
+    //   .filter((p) => isTomorrow(p.start) || isTomorrow(p.stop!))
+    //   .sort((b, a) => b.start.getTime() - a.start.getTime());
 
     const build = (eps: XmltvProgramme[]) => {
       const result = structuredClone(chaines);
@@ -58,9 +60,26 @@ export async function GET(request: NextRequest) {
       return result;
     };
 
+    const allDay = build(today);
+    const evening = allDay.map((c) => ({
+      ...c,
+      programmes: c.programmes.filter((p) => {
+        const start = utcToZonedTime(new Date(p.start), 'Europe/Paris');
+        return (
+          (start.getHours() === 20 && start.getMinutes() > 40) ||
+          start.getHours() >= 21
+        );
+      }),
+    }));
+
+    console.log(evening);
+
     await kv.set('last_update', new Date());
-    await kv.set('today', build(today));
-    await kv.set('tomorrow', build(tomorrow));
+    // await kv.set('today', allDay);
+    await kv.set('evening', evening);
+
+    // await kv.set('evening', build(today));
+    // await kv.set('tomorrow', build(tomorrow));
 
     console.log('Done.');
   } catch (e) {

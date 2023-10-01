@@ -12,8 +12,10 @@ type Props = {
   params: { chaine: string; start: string };
 };
 
+export const revalidate = 60 * 60; // 1 hour
+
 export default async function Programme({ params }: Props) {
-  const chaines = (await kv.get<Chaine[]>('today')) || [];
+  const chaines = (await kv.get<Chaine[]>('evening')) || [];
   console.log(`chaine ${params.chaine} at ${params.start}`);
 
   const programme = chaines
