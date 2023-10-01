@@ -1,16 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { gunzip } from 'node:zlib';
 import { promisify } from 'node:util';
 import { XmltvProgramme, parseXmltv } from '@iptv/xmltv';
 import { isToday } from 'date-fns';
 import { kv } from '@vercel/kv';
-import { sql } from '@vercel/postgres';
 import { ofetch } from 'ofetch';
 import { utcToZonedTime } from 'date-fns-tz';
 
 const ungz = promisify(gunzip);
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log('Récupération du programme en ligne...');
 
