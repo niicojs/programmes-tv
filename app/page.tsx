@@ -1,14 +1,15 @@
+import { formatDistance, setDefaultOptions } from 'date-fns';
+import fr from 'date-fns/locale/fr';
+
 import { Link } from '@/components/link';
 import { heure } from '@/lib/utils';
-import { kv } from '@vercel/kv';
-import { formatDistance, isTomorrow, setDefaultOptions } from 'date-fns';
-import fr from 'date-fns/locale/fr';
+import { getEvening, getLastUpdate } from './data';
 
 setDefaultOptions({ locale: fr });
 
 export default async function Home() {
-  const lastupdate = new Date((await kv.get<string>('last_update')) || 0);
-  const chaines = (await kv.get<Chaine[]>('evening')) || [];
+  const lastupdate = await getLastUpdate();
+  const chaines = await getEvening();
 
   return (
     <main className="flex min-h-screen flex-col justify-between md:p-24">
