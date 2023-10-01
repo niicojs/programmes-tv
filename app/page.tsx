@@ -7,6 +7,8 @@ import { getEvening, getLastUpdate } from './data';
 
 setDefaultOptions({ locale: fr });
 
+export const revalidate = 60 * 60; // 1 hour
+
 export default async function Home() {
   const lastupdate = await getLastUpdate();
   const chaines = await getEvening();
@@ -40,12 +42,19 @@ export default async function Home() {
         ))}
       </div>
 
-      <div className="mt-8 mb-32  text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:text-left">
+      <div className="mt-8 mb-32 text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:text-left lg:p-4">
         <div>
           Dernière mise à jour{' '}
           {formatDistance(lastupdate, new Date(), {
             addSuffix: true,
           })}
+          , généré le{' '}
+          {Intl.DateTimeFormat('fr', {
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          }).format(new Date())}
         </div>
       </div>
     </main>
