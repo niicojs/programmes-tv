@@ -63,7 +63,8 @@ export async function GET() {
     const evening = allDay.map((c) => ({
       ...c,
       programmes: c.programmes.filter((p) => {
-        const start = utcToZonedTime(new Date(p.start), 'Europe/Paris');
+        // const start = utcToZonedTime(new Date(p.start), 'Europe/Paris');
+        const start = new Date(p.start);
         return (
           (start.getHours() === 20 && start.getMinutes() > 40) ||
           start.getHours() >= 21
