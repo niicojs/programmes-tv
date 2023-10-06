@@ -81,9 +81,13 @@ export async function GET() {
     // await kv.set('tomorrow', build(tomorrow));
 
     console.log('Done.');
+
+    return NextResponse.json({ ok: true });
   } catch (e) {
     console.error(e);
+    return NextResponse.json(
+      { ok: false, error: (e as any).toString() },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json({ ok: true });
 }

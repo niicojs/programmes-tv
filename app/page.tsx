@@ -1,5 +1,6 @@
 import { formatDistance, setDefaultOptions } from 'date-fns';
 import fr from 'date-fns/locale/fr';
+import { utcToZonedTime } from 'date-fns-tz';
 
 import { Link } from '@/components/link';
 import { heure } from '@/lib/utils';
@@ -12,6 +13,7 @@ export const revalidate = 60 * 60; // 1 hour
 export default async function Home() {
   const lastupdate = await getLastUpdate();
   const chaines = await getEvening();
+  const now = utcToZonedTime(new Date(), 'Europe/Paris');
 
   return (
     <main className="flex min-h-screen flex-col justify-between md:p-24">
@@ -54,7 +56,7 @@ export default async function Home() {
             month: '2-digit',
             hour: '2-digit',
             minute: '2-digit',
-          }).format(new Date())}
+          }).format(now)}
         </div>
       </div>
     </main>
