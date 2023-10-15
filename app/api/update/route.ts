@@ -5,8 +5,11 @@ import { XmltvProgramme, parseXmltv } from '@iptv/xmltv';
 import { isToday } from 'date-fns';
 import { kv } from '@vercel/kv';
 import { ofetch } from 'ofetch';
+import { utcToZonedTime } from 'date-fns-tz';
 
 const ungz = promisify(gunzip);
+
+export const revalidate = 0;
 
 export async function GET() {
   try {
@@ -43,9 +46,7 @@ export async function GET() {
     const build = (eps: XmltvProgramme[]) => {
       const result = structuredClone(chaines);
       for (const chaine of result) {
-        const progs = eps.filter(
-          (p) => p.channel === chaine.id && p.start.getHours() >= 20
-        );
+        const progs = eps.filter((p) => p.channel === chaine.id);
         for (const prog of progs) {
           chaine.programmes.push({
             start: prog.start.getTime(),
@@ -65,7 +66,7 @@ export async function GET() {
     const evening = allDay.map((c) => ({
       ...c,
       programmes: c.programmes.filter((p) => {
-        const start = new Date(p.start);
+        const start = utcToZonedTime(new Date(p.start), 'Europe/Paris');
         return (
           (start.getHours() === 20 && start.getMinutes() > 40) ||
           start.getHours() >= 21
