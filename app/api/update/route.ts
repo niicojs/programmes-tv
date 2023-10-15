@@ -5,7 +5,6 @@ import { XmltvProgramme, parseXmltv } from '@iptv/xmltv';
 import { isToday } from 'date-fns';
 import { kv } from '@vercel/kv';
 import { ofetch } from 'ofetch';
-import { utcToZonedTime } from 'date-fns-tz';
 
 const ungz = promisify(gunzip);
 
@@ -20,7 +19,10 @@ export async function GET() {
     const programme = parseXmltv(xmltv);
     if (!programme.channels || !programme.programmes) {
       console.log('Pas assez de données...');
-      return NextResponse.json({ ok: false, error: 'No data' });
+      return NextResponse.json(
+        { ok: false, error: 'No data' },
+        { status: 500 }
+      );
     }
 
     const chaines: Chaine[] = programme.channels.map((c) => ({
@@ -63,7 +65,6 @@ export async function GET() {
     const evening = allDay.map((c) => ({
       ...c,
       programmes: c.programmes.filter((p) => {
-        // const start = utcToZonedTime(new Date(p.start), 'Europe/Paris');
         const start = new Date(p.start);
         return (
           (start.getHours() === 20 && start.getMinutes() > 40) ||
@@ -72,18 +73,15 @@ export async function GET() {
       }),
     }));
 
-    console.log(evening);
+    // console.log(evening);
 
     await kv.set('last_update', new Date());
     // await kv.set('today', allDay);
     await kv.set('evening', evening);
 
-    // await kv.set('evening', build(today));
-    // await kv.set('tomorrow', build(tomorrow));
-
     console.log('Done.');
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, date: new Date() });
   } catch (e) {
     console.error(e);
     return NextResponse.json(
