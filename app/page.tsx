@@ -5,6 +5,7 @@ import { utcToZonedTime } from 'date-fns-tz';
 import { Link } from '@/components/link';
 import { heure } from '@/lib/utils';
 import { getEvening, getLastUpdate } from './data';
+import clsx from 'clsx';
 
 setDefaultOptions({ locale: fr });
 
@@ -33,7 +34,10 @@ export default async function Home() {
                 {chaine.programmes.map((prog) => (
                   <div key={chaine.id + prog.start} className="flex flex-row">
                     <div className="w-14">{heure(prog.start)}</div>
-                    <Link href={`/programme/${chaine.id}/${prog.start}`}>
+                    <Link
+                      href={`/programme/${chaine.id}/${prog.start}`}
+                      className={clsx({ 'font-bold': prog.main })}
+                    >
                       {prog.title}
                     </Link>
                   </div>

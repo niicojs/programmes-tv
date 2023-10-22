@@ -16,6 +16,13 @@ export async function getEvening() {
       'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Logo_C8_2016.svg/langfr-225px-Logo_C8_2016.svg.png';
   }
 
+  for (const chaine of chaines) {
+    const prog = chaine.programmes.find(
+      (p) => p.stop - p.start > 1_000 * 60 * 40
+    );
+    if (prog) prog.main = true;
+  }
+
   return chaines;
 }
 

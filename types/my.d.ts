@@ -5,6 +5,7 @@ type Programme = {
   desc: string;
   category: string;
   icon?: string;
+  main?: boolean;
 };
 
 type Chaine = {
