@@ -1,6 +1,6 @@
 import { formatDistance, setDefaultOptions } from 'date-fns';
-import fr from 'date-fns/locale/fr';
-import { utcToZonedTime } from 'date-fns-tz';
+import { fr } from 'date-fns/locale';
+import { toZonedTime } from 'date-fns-tz';
 
 import { Link } from '@/components/link';
 import { heure } from '@/lib/utils';
@@ -14,7 +14,7 @@ export const revalidate = 60 * 60; // 1 hour
 export default async function Home() {
   const lastupdate = await getLastUpdate();
   const chaines = await getEvening();
-  const now = utcToZonedTime(new Date(), 'Europe/Paris');
+  const now = toZonedTime(new Date(), 'Europe/Paris');
 
   return (
     <main className="flex min-h-screen flex-col justify-between md:p-24">
@@ -37,8 +37,9 @@ export default async function Home() {
                     <Link
                       href={`/programme/${chaine.id}/${prog.start}`}
                       className={clsx({ 'font-bold': prog.main })}
+                      prefetch={false}
                     >
-                      {prog.title}
+                      {prog.title.replace(/&amp;/g, '&')}
                     </Link>
                   </div>
                 ))}

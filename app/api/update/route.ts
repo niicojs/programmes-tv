@@ -5,7 +5,7 @@ import { XmltvProgramme, parseXmltv } from '@iptv/xmltv';
 import { isToday } from 'date-fns';
 import { kv } from '@vercel/kv';
 import { ofetch } from 'ofetch';
-import { utcToZonedTime } from 'date-fns-tz';
+import { toZonedTime } from 'date-fns-tz';
 
 const ungz = promisify(gunzip);
 
@@ -66,7 +66,7 @@ export async function GET() {
     const evening = allDay.map((c) => ({
       ...c,
       programmes: c.programmes.filter((p) => {
-        const start = utcToZonedTime(new Date(p.start), 'Europe/Paris');
+        const start = toZonedTime(new Date(p.start), 'Europe/Paris');
         return (
           (start.getHours() === 20 && start.getMinutes() > 40) ||
           start.getHours() >= 21
@@ -74,15 +74,15 @@ export async function GET() {
       }),
     }));
 
-    // console.log(evening);
-
-    await kv.set('last_update', new Date());
-    // await kv.set('today', allDay);
-    await kv.set('evening', evening);
+    const updated = await kv.set('evening', evening);
+    if (updated === 'OK') {
+      await kv.set('last_update', new Date());
+      // await kv.set('today', allDay);
+    }
 
     console.log('Done.');
 
-    return NextResponse.json({ ok: true, date: new Date() });
+    return NextResponse.json({ ok: true, date: new Date(), updated });
   } catch (e) {
     console.error(e);
     return NextResponse.json(
