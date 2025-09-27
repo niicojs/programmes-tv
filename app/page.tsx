@@ -17,7 +17,7 @@ export default async function Home() {
   const now = toZonedTime(new Date(), 'Europe/Paris');
 
   return (
-    <main className="flex min-h-screen flex-col justify-between md:p-24">
+    <main className="flex min-h-screen flex-col justify-between md:p-12">
       <div className="z-10 max-w-5xl w-full items-center justify-between lg:flex">
         <p className="fixed left-0 top-0 flex w-full justify-center pb-6 pt-8 backdrop-blur-2xl lg:static lg:w-auto lg:p-4 font-bold">
           Ce soir à la télé
