@@ -1,0 +1,50 @@
+---
+import Layout from '../components/Layout.astro';
+import Header from '../components/Header.astro';
+import ChannelRow from '../components/ChannelRow.astro';
+import Footer from '../components/Footer.astro';
+import ProgramModal from '../components/ProgramModal.astro';
+import { getChannelsWithProgrammes, getBuildTime } from '../lib/xmltv';
+import type { ChannelWithProgrammes } from '../lib/types';
+
+// Fetch TV programme data at build time
+let channelsWithProgrammes: ChannelWithProgrammes[] = [];
+let error: string | null = null;
+
+try {
+  channelsWithProgrammes = await getChannelsWithProgrammes();
+} catch (e) {
+  error = e instanceof Error ? e.message : 'Erreur lors du chargement des programmes';
+  console.error('Failed to fetch TV programmes:', e);
+}
+
+const buildTime = getBuildTime();
+---
+
+<Layout>
+	<Header date={buildTime} />
+
+	<main class="min-h-[60vh] bg-gray-100">
+		{
+			error ? (
+				<div class="text-center py-12 px-4 text-red-500">
+					<p>Impossible de charger les programmes TV.</p>
+					<p class="text-sm opacity-80">{error}</p>
+				</div>
+			) : channelsWithProgrammes.length === 0 ? (
+				<div class="text-center py-12 px-4 text-gray-500">
+					<p>Aucun programme disponible pour ce soir.</p>
+				</div>
+			) : (
+				<div class="max-w-7xl mx-auto bg-white">
+					{channelsWithProgrammes.map(({ channel, programmes }) => (
+						<ChannelRow channel={channel} programmes={programmes} />
+					))}
+				</div>
+			)
+		}
+	</main>
+
+	<Footer buildTime={buildTime} />
+	<ProgramModal />
+</Layout>

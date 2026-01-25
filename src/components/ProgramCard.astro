@@ -1,0 +1,51 @@
+---
+import type { Programme } from '../lib/types';
+import { formatTime } from '../lib/utils';
+
+interface Props {
+  programme: Programme;
+}
+
+const { programme } = Astro.props;
+const startTime = formatTime(programme.start);
+const hasImage = !!programme.icon;
+
+// Prepare data for the modal (serializable)
+const programData = JSON.stringify({
+  id: programme.id,
+  title: programme.title,
+  subtitle: programme.subtitle,
+  description: programme.description,
+  category: programme.category,
+  icon: programme.icon,
+  startTime,
+  year: programme.year,
+  country: programme.country,
+  credits: programme.credits,
+});
+---
+
+<article
+  data-program={programData}
+  class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col min-w-44 max-w-56 shrink-0 cursor-pointer"
+  role="button"
+  tabindex="0"
+>
+  {
+    hasImage ? (
+      <div class="w-full aspect-video overflow-hidden bg-gray-200">
+        <img src={programme.icon} alt={programme.title} loading="lazy" class="w-full h-full object-cover" />
+      </div>
+    ) : (
+      <div class="w-full aspect-video flex items-center justify-center bg-linear-to-br from-indigo-500 to-purple-600">
+        <span class="text-4xl">📺</span>
+      </div>
+    )
+  }
+  <div class="p-3 flex-1 flex flex-col gap-1">
+    <time class="text-sm font-semibold text-red-500">{startTime}</time>
+    <h3 class="text-sm font-semibold text-slate-900 line-clamp-2 leading-tight">{programme.title}</h3>
+    {programme.subtitle && <p class="text-xs text-gray-500 line-clamp-1">{programme.subtitle}</p>}
+    {programme.category && <span class="text-xs uppercase text-gray-400 mt-auto pt-1">{programme.category}</span>}
+  </div>
+</article>

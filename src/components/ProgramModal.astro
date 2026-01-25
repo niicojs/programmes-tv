@@ -1,0 +1,230 @@
+---
+/**
+ * Modal component for displaying program details
+ * Uses vanilla JS for open/close functionality
+ */
+---
+
+<div
+  id="program-modal"
+  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title"
+>
+  <div
+    class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200"
+  >
+    <!-- Header with close button -->
+    <div class="relative">
+      <div id="modal-image" class="w-full aspect-video bg-gray-200">
+        <!-- Image inserted by JS -->
+      </div>
+      <button
+        id="modal-close"
+        class="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
+        aria-label="Fermer"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="p-5 overflow-y-auto flex-1">
+      <!-- Time and category -->
+      <div class="flex items-center gap-3 mb-2">
+        <time id="modal-time" class="text-lg font-bold text-red-500"></time>
+        <span id="modal-category" class="text-xs uppercase text-gray-400 bg-gray-100 px-2 py-1 rounded"></span>
+      </div>
+
+      <!-- Title -->
+      <h2 id="modal-title" class="text-xl font-bold text-slate-900 mb-1"></h2>
+
+      <!-- Subtitle -->
+      <p id="modal-subtitle" class="text-sm text-gray-500 mb-3 hidden"></p>
+
+      <!-- Year and country -->
+      <div id="modal-meta" class="text-sm text-gray-500 mb-3 hidden">
+        <span id="modal-year"></span>
+        <span id="modal-country"></span>
+      </div>
+
+      <!-- Description -->
+      <p id="modal-description" class="text-sm text-gray-700 leading-relaxed mb-4"></p>
+
+      <!-- Credits -->
+      <div id="modal-credits" class="space-y-2 text-sm hidden">
+        <div id="modal-directors" class="hidden">
+          <span class="font-semibold text-slate-700">Réalisateur(s) : </span>
+          <span class="text-gray-600"></span>
+        </div>
+        <div id="modal-actors" class="hidden">
+          <span class="font-semibold text-slate-700">Avec : </span>
+          <span class="text-gray-600"></span>
+        </div>
+        <div id="modal-presenters" class="hidden">
+          <span class="font-semibold text-slate-700">Présenté par : </span>
+          <span class="text-gray-600"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  interface ProgramData {
+    id: string;
+    title: string;
+    subtitle?: string;
+    description?: string;
+    category?: string;
+    icon?: string;
+    startTime: string;
+    year?: string;
+    country?: string;
+    credits: {
+      directors: string[];
+      actors: string[];
+      presenters: string[];
+    };
+  }
+
+  const modal = document.getElementById('program-modal') as HTMLDivElement;
+  const closeBtn = document.getElementById('modal-close') as HTMLButtonElement;
+
+  // Modal elements
+  const modalImage = document.getElementById('modal-image') as HTMLDivElement;
+  const modalTime = document.getElementById('modal-time') as HTMLTimeElement;
+  const modalCategory = document.getElementById('modal-category') as HTMLSpanElement;
+  const modalTitle = document.getElementById('modal-title') as HTMLHeadingElement;
+  const modalSubtitle = document.getElementById('modal-subtitle') as HTMLParagraphElement;
+  const modalMeta = document.getElementById('modal-meta') as HTMLDivElement;
+  const modalYear = document.getElementById('modal-year') as HTMLSpanElement;
+  const modalCountry = document.getElementById('modal-country') as HTMLSpanElement;
+  const modalDescription = document.getElementById('modal-description') as HTMLParagraphElement;
+  const modalCredits = document.getElementById('modal-credits') as HTMLDivElement;
+  const modalDirectors = document.getElementById('modal-directors') as HTMLDivElement;
+  const modalActors = document.getElementById('modal-actors') as HTMLDivElement;
+  const modalPresenters = document.getElementById('modal-presenters') as HTMLDivElement;
+
+  function openModal(program: ProgramData) {
+    // Set image
+    if (program.icon) {
+      modalImage.innerHTML = `<img src="${program.icon}" alt="${program.title}" class="w-full h-full object-cover" />`;
+    } else {
+      modalImage.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-linear-to-br from-indigo-500 to-purple-600"><span class="text-6xl">📺</span></div>`;
+    }
+
+    // Set basic info
+    modalTime.textContent = program.startTime;
+    modalTitle.textContent = program.title;
+
+    // Category
+    if (program.category) {
+      modalCategory.textContent = program.category;
+      modalCategory.classList.remove('hidden');
+    } else {
+      modalCategory.classList.add('hidden');
+    }
+
+    // Subtitle
+    if (program.subtitle) {
+      modalSubtitle.textContent = program.subtitle;
+      modalSubtitle.classList.remove('hidden');
+    } else {
+      modalSubtitle.classList.add('hidden');
+    }
+
+    // Year and country
+    const hasYear = !!program.year;
+    const hasCountry = !!program.country;
+    if (hasYear || hasCountry) {
+      modalYear.textContent = program.year || '';
+      modalCountry.textContent = hasYear && hasCountry ? ` - ${program.country}` : program.country || '';
+      modalMeta.classList.remove('hidden');
+    } else {
+      modalMeta.classList.add('hidden');
+    }
+
+    // Description
+    modalDescription.textContent = program.description || 'Pas de description disponible.';
+
+    // Credits
+    const hasDirectors = program.credits.directors.length > 0;
+    const hasActors = program.credits.actors.length > 0;
+    const hasPresenters = program.credits.presenters.length > 0;
+
+    if (hasDirectors || hasActors || hasPresenters) {
+      modalCredits.classList.remove('hidden');
+
+      if (hasDirectors) {
+        modalDirectors.querySelector('.text-gray-600')!.textContent = program.credits.directors.join(', ');
+        modalDirectors.classList.remove('hidden');
+      } else {
+        modalDirectors.classList.add('hidden');
+      }
+
+      if (hasActors) {
+        modalActors.querySelector('.text-gray-600')!.textContent = program.credits.actors.join(', ');
+        modalActors.classList.remove('hidden');
+      } else {
+        modalActors.classList.add('hidden');
+      }
+
+      if (hasPresenters) {
+        modalPresenters.querySelector('.text-gray-600')!.textContent = program.credits.presenters.join(', ');
+        modalPresenters.classList.remove('hidden');
+      } else {
+        modalPresenters.classList.add('hidden');
+      }
+    } else {
+      modalCredits.classList.add('hidden');
+    }
+
+    // Show modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  // Close on button click
+  closeBtn.addEventListener('click', closeModal);
+
+  // Close on backdrop click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+
+  // Listen for program card clicks
+  document.addEventListener('click', (e) => {
+    const card = (e.target as HTMLElement).closest('[data-program]');
+    if (card) {
+      const programData = card.getAttribute('data-program');
+      if (programData) {
+        try {
+          const program = JSON.parse(programData) as ProgramData;
+          openModal(program);
+        } catch (err) {
+          console.error('Failed to parse program data:', err);
+        }
+      }
+    }
+  });
+</script>
