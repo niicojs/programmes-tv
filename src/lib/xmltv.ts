@@ -4,10 +4,34 @@
 
 import { XMLParser } from 'fast-xml-parser';
 import { gunzipSync } from 'fflate';
-import type { Channel, Programme, Credits, ChannelWithProgrammes, XmltvRaw, XmltvChannelRaw, XmltvProgrammeRaw } from './types';
-import { parseXmltvDate, isPrimeTime, extractText, extractIcon, extractCategory, extractNameList, generateProgrammeId } from './utils';
+import type {
+  Channel,
+  Programme,
+  Credits,
+  ChannelWithProgrammes,
+  XmltvRaw,
+  XmltvChannelRaw,
+  XmltvProgrammeRaw,
+} from './types';
+import {
+  parseXmltvDate,
+  isPrimeTime,
+  extractText,
+  extractIcon,
+  extractCategory,
+  extractNameList,
+  generateProgrammeId,
+} from './utils';
 
 const XMLTV_URL = 'https://xmltvfr.fr/xmltv/xmltv_tnt.xml.gz';
+
+const IGNORE_CHANNELS = new Set<string>([
+  'LCI.fr',
+  'LaChaineParlementaire.fr',
+  'BFMTV.fr',
+  'CNews.fr',
+  'FranceInfo.fr',
+]);
 
 // TNT channel order (by channel number)
 const TNT_CHANNEL_ORDER: Record<string, number> = {
@@ -126,6 +150,8 @@ function getChannelOrder(channelId: string): number {
  * Main function: fetch and return channels with their prime-time programmes
  */
 export async function getChannelsWithProgrammes(): Promise<ChannelWithProgrammes[]> {
+  console.log('Get programmes from XMLTV data');
+
   // Fetch and parse XMLTV data
   const xmlString = await fetchXmltvData();
   const xmlData = parseXml(xmlString);
@@ -136,7 +162,7 @@ export async function getChannelsWithProgrammes(): Promise<ChannelWithProgrammes
 
   // Parse programmes and filter for prime time
   const programmesRaw = xmlData.tv.programme || [];
-  const allProgrammes = programmesRaw.map(parseProgramme);
+  const allProgrammes = programmesRaw.map(parseProgramme).filter((p) => !IGNORE_CHANNELS.has(p.channelId));
 
   // Filter programmes for prime time (20h-23h)
   const primeTimeProgrammes = allProgrammes.filter((prog) => isPrimeTime(prog.start, prog.stop));

@@ -22,29 +22,29 @@ const buildTime = getBuildTime();
 ---
 
 <Layout>
-	<Header date={buildTime} />
+  <Header date={buildTime} />
 
-	<main class="min-h-[60vh] bg-gray-100">
-		{
-			error ? (
-				<div class="text-center py-12 px-4 text-red-500">
-					<p>Impossible de charger les programmes TV.</p>
-					<p class="text-sm opacity-80">{error}</p>
-				</div>
-			) : channelsWithProgrammes.length === 0 ? (
-				<div class="text-center py-12 px-4 text-gray-500">
-					<p>Aucun programme disponible pour ce soir.</p>
-				</div>
-			) : (
-				<div class="max-w-7xl mx-auto bg-white">
-					{channelsWithProgrammes.map(({ channel, programmes }) => (
-						<ChannelRow channel={channel} programmes={programmes} />
-					))}
-				</div>
-			)
-		}
-	</main>
+  <main class="min-h-[60vh] bg-gray-100">
+    {
+      error ? (
+        <div class="text-center py-12 px-4 text-red-500">
+          <p>Impossible de charger les programmes TV.</p>
+          <p class="text-sm opacity-80">{error}</p>
+        </div>
+      ) : channelsWithProgrammes.length === 0 ? (
+        <div class="text-center py-12 px-4 text-gray-500">
+          <p>Aucun programme disponible pour ce soir.</p>
+        </div>
+      ) : (
+        <div class="max-w-7xl mx-auto bg-white">
+          {channelsWithProgrammes.map(({ channel, programmes }) => (
+            <ChannelRow channel={channel} programmes={programmes} />
+          ))}
+        </div>
+      )
+    }
+  </main>
 
-	<Footer buildTime={buildTime} />
-	<ProgramModal />
+  <Footer buildTime={buildTime} />
+  <ProgramModal />
 </Layout>
