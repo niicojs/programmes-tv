@@ -12,13 +12,13 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^6.0.0-beta.3",
-    "fast-xml-parser": "^5.3.3",
+    "fast-xml-parser": "^5.3.4",
     "fflate": "^0.8.2",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
-    "oxfmt": "^0.26.0",
+    "oxfmt": "^0.27.0",
     "typescript": "^5.9.3"
   },
   "pnpm": {}

@@ -1,13 +1,9 @@
-name: Nightly Build & Deploy
+name: Nightly Build
 
 on:
-  push:
-    branches:
-      - main
   schedule:
     # Run at 4:00 UTC (5:00 AM Paris time in winter, 6:00 AM in summer)
     - cron: '0 4 * * *'
-  workflow_dispatch: # Allow manual trigger
 
 jobs:
   build-and-deploy:
