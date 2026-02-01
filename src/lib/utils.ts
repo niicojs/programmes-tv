@@ -2,6 +2,8 @@
  * Utility functions for date formatting and parsing
  */
 
+const PARIS_TIMEZONE = 'Europe/Paris';
+
 const DAYS_FR = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const MONTHS_FR = [
   'janvier',
@@ -19,26 +21,69 @@ const MONTHS_FR = [
 ];
 
 /**
- * Format a date as French time (e.g., "20h35")
+ * Get date components in Paris timezone
+ */
+function getParisDateParts(date: Date): {
+  year: number;
+  month: number;
+  day: number;
+  weekday: number;
+  hours: number;
+  minutes: number;
+} {
+  // Use Intl.DateTimeFormat to get parts in Paris timezone
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: PARIS_TIMEZONE,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    weekday: 'short',
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: false,
+  });
+
+  const parts = formatter.formatToParts(date);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value || '0';
+
+  // Map weekday abbreviation to day index (0 = Sunday)
+  const weekdayMap: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+
+  return {
+    year: parseInt(get('year'), 10),
+    month: parseInt(get('month'), 10) - 1, // 0-indexed like JS Date
+    day: parseInt(get('day'), 10),
+    weekday: weekdayMap[get('weekday')] ?? 0,
+    hours: parseInt(get('hour'), 10),
+    minutes: parseInt(get('minute'), 10),
+  };
+}
+
+/**
+ * Format a date as French time (e.g., "20h35") in Paris timezone
  */
 export function formatTime(date: Date): string {
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  if (minutes === 0) {
-    return `${hours}h`;
-  }
+  const { hours, minutes } = getParisDateParts(date);
+  if (minutes === 0) return `${hours}h`;
   return `${hours}h${minutes.toString().padStart(2, '0')}`;
 }
 
 /**
- * Format a date as French full date (e.g., "Lundi 27 janvier 2025")
+ * Format a date as French full date (e.g., "Lundi 27 janvier 2025") in Paris timezone
  */
 export function formatDateFR(date: Date): string {
-  const dayName = DAYS_FR[date.getDay()];
-  const day = date.getDate();
-  const month = MONTHS_FR[date.getMonth()];
-  const year = date.getFullYear();
-  return `${dayName} ${day} ${month} ${year}`;
+  const { weekday, day, month, year } = getParisDateParts(date);
+  const dayName = DAYS_FR[weekday];
+  const monthName = MONTHS_FR[month];
+  return `${dayName} ${day} ${monthName} ${year}`;
 }
 
 /**
@@ -74,11 +119,35 @@ export function parseXmltvDate(xmltvDate: string): Date {
 }
 
 /**
- * Get today's date at a specific hour (in local timezone)
+ * Get today's date at a specific hour in Paris timezone
  */
-export function getTodayAt(hour: number, minute: number = 0): Date {
+function getTodayAt(hour: number, minute: number = 0): Date {
   const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0, 0);
+  const { year, month, day } = getParisDateParts(now);
+
+  // Create a date string in Paris timezone and parse it
+  // Format: YYYY-MM-DDTHH:mm:ss
+  const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
+
+  // Parse this as a Paris time by creating a formatter that outputs the offset
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: PARIS_TIMEZONE,
+    timeZoneName: 'shortOffset',
+  });
+
+  // Get the current Paris offset (handles DST automatically)
+  const parts = formatter.formatToParts(now);
+  const offsetPart = parts.find((p) => p.type === 'timeZoneName')?.value || '+01:00';
+  // Convert "GMT+1" or "GMT+2" to "+01:00" or "+02:00"
+  const offsetMatch = offsetPart.match(/GMT([+-])(\d+)/);
+  let isoOffset = '+01:00';
+  if (offsetMatch) {
+    const sign = offsetMatch[1];
+    const hours = offsetMatch[2].padStart(2, '0');
+    isoOffset = `${sign}${hours}:00`;
+  }
+
+  return new Date(`${dateStr}${isoOffset}`);
 }
 
 /**
@@ -151,6 +220,9 @@ export function generateProgrammeId(channelId: string, start: Date, title: strin
   const timestamp = start.getTime();
   // Ensure title is a string before processing
   const safeTitle = typeof title === 'string' ? title : String(title || '');
-  const titleSlug = safeTitle.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 20);
+  const titleSlug = safeTitle
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+    .substring(0, 20);
   return `${channelId}-${timestamp}-${titleSlug}`;
 }
