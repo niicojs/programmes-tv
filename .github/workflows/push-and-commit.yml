@@ -16,10 +16,10 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          cache: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
           cache: 'pnpm'
@@ -31,7 +31,7 @@ jobs:
         run: pnpm build
 
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
+        uses: amondnet/vercel-action@v42
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
