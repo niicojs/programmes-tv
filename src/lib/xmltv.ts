@@ -4,6 +4,7 @@
 
 import { XMLParser } from 'fast-xml-parser';
 import { gunzipSync } from 'fflate';
+
 import type {
   Channel,
   Programme,
