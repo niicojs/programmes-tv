@@ -1,9 +1,7 @@
 ---
 import { formatDateFR } from '../lib/utils';
 
-interface Props {
-  date?: Date;
-}
+interface Props {  date?: Date;}
 
 const { date = new Date() } = Astro.props;
 const formattedDate = formatDateFR(date);

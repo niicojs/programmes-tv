@@ -1,9 +1,7 @@
 ---
 import { formatTime, formatDateFR } from '../lib/utils';
 
-interface Props {
-  buildTime?: Date;
-}
+interface Props {  buildTime?: Date;}
 
 const { buildTime = new Date() } = Astro.props;
 const formattedTime = formatTime(buildTime);

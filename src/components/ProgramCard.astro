@@ -2,9 +2,7 @@
 import type { Programme } from '../lib/types';
 import { formatTime } from '../lib/utils';
 
-interface Props {
-  programme: Programme;
-}
+interface Props {  programme: Programme;}
 
 const { programme } = Astro.props;
 const startTime = formatTime(programme.start);
