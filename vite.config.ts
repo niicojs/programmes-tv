@@ -7,11 +7,6 @@ export default defineConfig({
     singleQuote: true,
     printWidth: 120,
     sortImports: true,
-    experimentalTailwindcss: {
-      stylesheet: './src/styles/global.css',
-      attributes: ['class', 'className'],
-      functions: [],
-      preserveWhitespace: true,
-    },
+    sortTailwindcss: true,
   },
 });
