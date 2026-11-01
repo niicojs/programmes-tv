@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "astro dev --port 3000",
     "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
+    "preview": "astro preview --port 3000",
     "format": "vp fmt"
   },
   "dependencies": {
