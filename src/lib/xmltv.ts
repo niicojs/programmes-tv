@@ -70,7 +70,11 @@ const TNT_CHANNEL_ORDER: Record<string, number> = {
 async function fetchXmltvData(): Promise<string> {
   const response = await fetch(XMLTV_URL);
   if (!response.ok) {
-    throw new Error(`Failed to fetch XMLTV data: ${response.status} ${response.statusText}`);
+    let data = '';
+    try {
+      data = await response.text();
+    } catch {}
+    throw new Error(`Failed to fetch XMLTV data: ${response.status} ${response.statusText}. Data = ${data}`);
   }
 
   const compressedBuffer = await response.arrayBuffer();
